@@ -10,8 +10,7 @@ Pycbye provides a simple, fast and efficient way to remove unnecessary Python by
 
 - Recursively scans directories for `.pyc` files and `__pycache__` directories.
 - Safe approach: removes all bytecode files (`*.pyc`, `*.pyo`) found in the directory tree and removes only **empty** parent `__pycache__` directories after cleaning bytecode files.
-- Allows users to specify a directory to clean or clean the current directory by default.
-- Supports verbose mode to display detailed information about the cleaning process.
+- Supports verbose mode (`--verbose`) to display detailed information about the cleaning process.
 - Cross-platform support for Windows, macOS, and Linux.
 
 ## Getting Started
@@ -30,7 +29,7 @@ cargo install --path .
 
 ## Usage
 
-Run `pycbye .` inside the directory you want to clean.
+Run `pycbye .` inside the directory you want to clean or provide a path to this directory like this: `pycbye my/path`.
 
 For more options, run `pycbye --help`.
 
