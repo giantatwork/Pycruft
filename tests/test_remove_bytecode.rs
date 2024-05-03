@@ -1,4 +1,4 @@
-use pycbye::remove_bytecode;
+use pycruft::remove_bytecode;
 use std::fs;
 
 #[cfg(test)]

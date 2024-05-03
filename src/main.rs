@@ -1,7 +1,7 @@
 use clap::Parser;
 use std::path::Path;
 
-use pycbye::remove_bytecode;
+use pycruft::remove_bytecode;
 
 #[derive(Parser)]
 struct Args {
