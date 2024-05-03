@@ -29,7 +29,7 @@ cargo install --path .
 
 ## Usage
 
-Run `Pycruft .` inside the directory you want to clean or provide a path to this directory like this: `pycruft my/path`.
+Run `pycruft .` inside the directory you want to clean or provide a path to this directory like this: `pycruft my/path`.
 
 For more options, run `pycruft --help`.
 
