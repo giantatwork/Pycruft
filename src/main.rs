@@ -8,11 +8,13 @@ struct Args {
     directory: String,
     #[arg(short, long)]
     verbose: bool,
+    #[arg(short, long)]
+    safe: bool,
 }
 
 fn main() {
     let args = Args::parse();
     let dir = Path::new(&args.directory);
 
-    remove_bytecode(dir, args.verbose);
+    remove_bytecode(dir, Some(args.verbose), Some(args.safe));
 }

@@ -4,14 +4,15 @@ use std::{fs, process};
 static BYTECODE_EXTENSIONS: [&str; 2] = ["pyc", "pyo"];
 static BYTECODE_DIRS: [&str; 1] = ["__pycache__"];
 
-fn walk_directory(dir: &Path) -> Result<Vec<PathBuf>, std::io::Error> {
+fn walk_directory(dir: &Path, safe: Option<bool>) -> Result<Vec<PathBuf>, std::io::Error> {
     let mut results: Vec<PathBuf> = Vec::new();
+    let safe = safe.unwrap_or(true);
 
     for entry in fs::read_dir(dir)? {
         let entry = entry?;
         let path = entry.path();
         if path.is_dir() {
-            results.extend(walk_directory(&path)?);
+            results.extend(walk_directory(&path, Some(safe))?);
             let contains_bytecode = BYTECODE_DIRS.iter().any(|&bytecode_dir| {
                 path.file_name()
                     .map_or(false, |file_name| file_name == bytecode_dir)
@@ -19,7 +20,7 @@ fn walk_directory(dir: &Path) -> Result<Vec<PathBuf>, std::io::Error> {
             if contains_bytecode {
                 results.push(path)
             }
-        } else if path.is_file() {
+        } else if safe && path.is_file() {
             let contains_bytecode = BYTECODE_EXTENSIONS.iter().any(|&bytecode_ext| {
                 path.extension()
                     .map_or(false, |file_extension| file_extension == bytecode_ext)
@@ -34,8 +35,11 @@ fn walk_directory(dir: &Path) -> Result<Vec<PathBuf>, std::io::Error> {
     Ok(results)
 }
 
-pub fn remove_bytecode(dir: &Path, verbose: bool) {
-    let results = match walk_directory(dir) {
+pub fn remove_bytecode(dir: &Path, verbose: Option<bool>, safe: Option<bool>) {
+    let safe = safe.unwrap_or(true);
+    let verbose = verbose.unwrap_or(false);
+
+    let results = match walk_directory(dir, Some(safe)) {
         Ok(results) => results,
         Err(error) => {
             println!("Error: {}", error);
@@ -58,14 +62,19 @@ pub fn remove_bytecode(dir: &Path, verbose: bool) {
                 }
             }
         } else if path.is_dir() {
-            if let Err(error) = fs::remove_dir(&path) {
-                println!("Unable to remove: {}, error: {}", path_str, error);
+            if safe {
+                if let Err(error) = fs::remove_dir(&path) {
+                    println!("Unable to remove: {}, error: {}", path_str, error);
+                }
             } else {
-                if verbose {
-                    println!("Removed directory: {}", path_str);
-                    dirs_removed = dirs_removed + 1;
+                if let Err(error) = fs::remove_dir_all(&path) {
+                    println!("Unable to remove: {}, error: {}", path_str, error);
                 }
             }
+            if verbose {
+                println!("Removed directory: {}", path_str);
+            }
+            dirs_removed = dirs_removed + 1;
         }
     }
     if verbose {
