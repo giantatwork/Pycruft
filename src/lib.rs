@@ -2,7 +2,7 @@ use std::path::{Path, PathBuf};
 use std::{fs, process};
 
 static BYTECODE_EXTENSIONS: [&str; 2] = ["pyc", "pyo"];
-static BYTECODE_DIRS: [&str; 1] = ["__pycache__"];
+static BYTECODE_DIR: &str = "__pycache__";
 
 fn walk_directory(dir: &Path, safe: Option<bool>) -> Result<Vec<PathBuf>, std::io::Error> {
     let mut results: Vec<PathBuf> = Vec::new();
@@ -13,10 +13,10 @@ fn walk_directory(dir: &Path, safe: Option<bool>) -> Result<Vec<PathBuf>, std::i
         let path = entry.path();
         if path.is_dir() {
             results.extend(walk_directory(&path, Some(safe))?);
-            let contains_bytecode = BYTECODE_DIRS.iter().any(|&bytecode_dir| {
-                path.file_name()
-                    .map_or(false, |file_name| file_name == bytecode_dir)
-            });
+            let contains_bytecode = match path.file_name() {
+                Some(name) => name == BYTECODE_DIR,
+                None => false,
+            };
             if contains_bytecode {
                 results.push(path)
             }
