@@ -3,12 +3,20 @@ use std::path::Path;
 
 use pycruft::remove_bytecode;
 
-#[derive(Parser)]
+#[derive(Parser, Debug, Default)]
+#[clap(
+    author = "Giant at Work",
+    version,
+    about = "Pycruft is a Python bytecode cleaner written in Rust"
+)]
 struct Args {
     directory: String,
-    #[arg(short, long)]
+    /// Directory to start searching
+    #[clap(short, long)]
+    /// Verbose mode
     verbose: bool,
-    #[arg(short, long)]
+    #[clap(short, long)]
+    /// Safe mode
     safe: bool,
 }
 
