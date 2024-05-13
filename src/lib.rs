@@ -13,8 +13,9 @@ fn find_bytecode_dirs(dir: &Path) -> Result<Vec<PathBuf>, std::io::Error> {
                 if let Some(file_name) = path_path.file_name() {
                     if file_name == BYTECODE_DIR {
                         results.push(path_path.clone())
+                    } else {
+                        results.extend(find_bytecode_dirs(&path_path).unwrap());
                     }
-                    results.extend(find_bytecode_dirs(&path_path).unwrap());
                 }
             }
         }
