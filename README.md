@@ -1,16 +1,16 @@
 # Pycruft
 
-Pycruft is a command-line tool written in Rust for cleaning up Python bytecode files (`.pyc` and `.pyo`) and associated cache directories (`__pycache__`).
+Pycruft is a command-line tool written in Rust for cleaning up Python bytecode `__pycache__`  directories containing `.pyc` and `.pyo` files.
 
 ## Overview
 
-Pycruft provides a simple, fast and efficient way to remove unnecessary Python bytecode files and cache directories from your project directories. It helps keep your project directories clean and organized by removing clutter generated during Python development. It can be employed, for instance, within a Git post-checkout hook, to mitigate conflicts.
+Pycruft provides a simple, fast and efficient way to remove unnecessary Python bytecode directories from your project. It helps keep your project directories clean and organized by removing clutter generated during Python development. It can be employed, for instance, within a Git post-checkout hook, to mitigate conflicts during development.
 
 ## Features
 
-- Recursively scans directories for `.pyc` files and `__pycache__` directories.
-- Safe approach: removes all bytecode files (`*.pyc`, `*.pyo`) found in the directory tree and removes only **empty** parent `__pycache__` directories after cleaning bytecode files.
-- Supports verbose mode (`--verbose`) to display detailed information about the cleaning process.
+- Recursively scans directories `__pycache__` directories.
+- Verbose mode (`-v`, `--verbose`), display detailed information about the cleaning process.
+- Confirmation mode (`-c`, `--confirm`), show directories to be deleted and ask for confirmation.
 - Cross-platform support for Windows, macOS, and Linux.
 
 ## Getting Started

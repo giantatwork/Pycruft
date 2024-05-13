@@ -7,11 +7,11 @@ use pycruft::start;
 #[clap(
     author = "Giant at Work",
     version,
-    about = "Pycruft is a Python bytecode cleaner written in Rust"
+    about = "Pycruft is a Python __pycache__ cleaner written in Rust"
 )]
 struct Args {
-    directory: String,
     /// Directory to start searching
+    directory: String,
     #[clap(short, long)]
     /// Verbose mode
     verbose: bool,

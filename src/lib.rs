@@ -23,7 +23,7 @@ fn find_bytecode_dirs(dir: &Path) -> Result<Vec<PathBuf>, std::io::Error> {
     Ok(results)
 }
 
-fn remove_bytecode_dirs(results: &Vec<PathBuf>, verbose: bool) -> Result<(), std::io::Error> {
+fn remove_bytecode_dirs(results: &Vec<PathBuf>, verbose: bool) -> Result<u32, std::io::Error> {
     let mut dirs_removed: u32 = 0;
 
     for path in results {
@@ -38,11 +38,8 @@ fn remove_bytecode_dirs(results: &Vec<PathBuf>, verbose: bool) -> Result<(), std
             println!("Removed directory: {}", path.to_string_lossy());
         }
         dirs_removed += 1;
-        if verbose {
-            println!("Removed {} directories", dirs_removed);
-        }
     }
-    Ok(())
+    Ok(dirs_removed)
 }
 
 pub fn start(dir: &Path, confirm: Option<bool>, verbose: Option<bool>) {
@@ -57,30 +54,52 @@ pub fn start(dir: &Path, confirm: Option<bool>, verbose: Option<bool>) {
         }
     };
 
-    if confirm {
-        println!("Do you want to remove the following directories? (yes/no)");
+    if results.len() == 0 {
+        println!("No '{}' directories found", BYTECODE_DIR);
+        process::exit(0);
+    }
 
-        for path in &results {
-            println!("{}", path.to_string_lossy());
+    if !confirm {
+        match remove_bytecode_dirs(&results, verbose) {
+            Ok(dirs_removed) => {
+                println!("Removed {} directories", dirs_removed);
+                process::exit(0);
+            }
+            Err(error) => {
+                println!("Error: {}", error);
+                process::exit(1);
+            }
         }
+    }
 
-        let mut input = String::new();
-        io::stdin()
-            .read_line(&mut input)
-            .expect("Failed to read line");
+    for path in &results {
+        println!("{}", path.to_string_lossy());
+    }
+    println!("\nDo you want to remove the listed directories? (yes/no)");
 
-        let input = input.trim().to_lowercase();
+    let mut input = String::new();
 
-        if input == "yes" {
-            remove_bytecode_dirs(&results, verbose).unwrap();
-        } else if input == "no" {
-            println!("Cancelled");
-            process::exit(0);
-        } else {
-            println!("Invalid input. Please type 'yes' or 'no'.");
-            process::exit(1);
+    io::stdin()
+        .read_line(&mut input)
+        .expect("Failed to read line");
+
+    let input = input.trim().to_lowercase();
+
+    if input == "yes" {
+        match remove_bytecode_dirs(&results, verbose) {
+            Ok(dirs_removed) => {
+                println!("Removed {} directories", dirs_removed);
+                process::exit(0);
+            }
+            Err(error) => {
+                println!("Error: {}", error);
+                process::exit(1);
+            }
         }
+    } else if input == "no" {
+        println!("Cancelled");
     } else {
-        remove_bytecode_dirs(&results, verbose).unwrap();
+        println!("Invalid input. Please type 'yes' or 'no'.");
+        process::exit(1);
     }
 }
