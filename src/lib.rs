@@ -1,45 +1,55 @@
 use std::path::{Path, PathBuf};
-use std::{fs, process};
+use std::{fs, io, process};
 
-static BYTECODE_EXTENSIONS: [&str; 2] = ["pyc", "pyo"];
 static BYTECODE_DIR: &str = "__pycache__";
 
-fn walk_directory(dir: &Path, safe: Option<bool>) -> Result<Vec<PathBuf>, std::io::Error> {
+fn find_bytecode_dirs(dir: &Path) -> Result<Vec<PathBuf>, std::io::Error> {
     let mut results: Vec<PathBuf> = Vec::new();
-    let safe = safe.unwrap_or(true);
 
-    for entry in fs::read_dir(dir)? {
-        let entry = entry?;
-        let path = entry.path();
-        if path.is_dir() {
-            results.extend(walk_directory(&path, Some(safe))?);
-            let contains_bytecode = match path.file_name() {
-                Some(name) => name == BYTECODE_DIR,
-                None => false,
-            };
-            if contains_bytecode {
-                results.push(path)
-            }
-        } else if safe && path.is_file() {
-            let contains_bytecode = BYTECODE_EXTENSIONS.iter().any(|&bytecode_ext| {
-                path.extension()
-                    .map_or(false, |file_extension| file_extension == bytecode_ext)
-            });
-            if contains_bytecode {
-                results.push(path);
+    if let Ok(paths) = fs::read_dir(dir) {
+        for path in paths.filter_map(Result::ok) {
+            let path_path = path.path();
+            if path_path.is_dir() {
+                if let Some(file_name) = path_path.file_name() {
+                    if file_name == BYTECODE_DIR {
+                        results.push(path_path.clone())
+                    }
+                    results.extend(find_bytecode_dirs(&path_path).unwrap());
+                }
             }
         }
     }
-    results.sort_by(|a, b| b.cmp(a));
 
     Ok(results)
 }
 
-pub fn remove_bytecode(dir: &Path, verbose: Option<bool>, safe: Option<bool>) {
-    let safe = safe.unwrap_or(true);
+fn remove_bytecode_dirs(results: &Vec<PathBuf>, verbose: bool) -> Result<(), std::io::Error> {
+    let mut dirs_removed: u32 = 0;
+
+    for path in results {
+        if let Err(error) = fs::remove_dir_all(&path) {
+            println!(
+                "Unable to remove: {}, error: {}",
+                path.to_string_lossy(),
+                error
+            );
+            return Err(error);
+        } else if verbose {
+            println!("Removed directory: {}", path.to_string_lossy());
+        }
+        dirs_removed += 1;
+        if verbose {
+            println!("Removed {} directories", dirs_removed);
+        }
+    }
+    Ok(())
+}
+
+pub fn start(dir: &Path, confirm: Option<bool>, verbose: Option<bool>) {
+    let confirm = confirm.unwrap_or(false);
     let verbose = verbose.unwrap_or(false);
 
-    let results = match walk_directory(dir, Some(safe)) {
+    let results = match find_bytecode_dirs(dir) {
         Ok(results) => results,
         Err(error) => {
             println!("Error: {}", error);
@@ -47,40 +57,30 @@ pub fn remove_bytecode(dir: &Path, verbose: Option<bool>, safe: Option<bool>) {
         }
     };
 
-    let mut files_removed: u32 = 0;
-    let mut dirs_removed: u32 = 0;
+    if confirm {
+        println!("Do you want to remove the following directories? (yes/no)");
 
-    for path in results {
-        let path_str = path.to_string_lossy();
-        if path.is_file() {
-            if let Err(error) = fs::remove_file(&path) {
-                println!("Error: {}", error);
-            } else {
-                if verbose {
-                    println!("Removed file: {}", path_str);
-                    files_removed = files_removed + 1;
-                }
-            }
-        } else if path.is_dir() {
-            if safe {
-                if let Err(error) = fs::remove_dir(&path) {
-                    println!("Unable to remove: {}, error: {}", path_str, error);
-                }
-            } else {
-                if let Err(error) = fs::remove_dir_all(&path) {
-                    println!("Unable to remove: {}, error: {}", path_str, error);
-                }
-            }
-            if verbose {
-                println!("Removed directory: {}", path_str);
-            }
-            dirs_removed = dirs_removed + 1;
+        for path in &results {
+            println!("{}", path.to_string_lossy());
         }
-    }
-    if verbose {
-        println!(
-            "Removed {} files and {} directories",
-            files_removed, dirs_removed
-        );
+
+        let mut input = String::new();
+        io::stdin()
+            .read_line(&mut input)
+            .expect("Failed to read line");
+
+        let input = input.trim().to_lowercase();
+
+        if input == "yes" {
+            remove_bytecode_dirs(&results, verbose).unwrap();
+        } else if input == "no" {
+            println!("Cancelled");
+            process::exit(0);
+        } else {
+            println!("Invalid input. Please type 'yes' or 'no'.");
+            process::exit(1);
+        }
+    } else {
+        remove_bytecode_dirs(&results, verbose).unwrap();
     }
 }
