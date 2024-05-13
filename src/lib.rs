@@ -99,7 +99,7 @@ pub fn start(dir: &Path, confirm: Option<bool>, verbose: Option<bool>) {
     } else if input == "no" {
         println!("Cancelled");
     } else {
-        println!("Invalid input. Please type 'yes' or 'no'.");
+        println!("Invalid input: please type 'yes' or 'no'");
         process::exit(1);
     }
 }
