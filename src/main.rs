@@ -13,11 +13,11 @@ struct Args {
     /// Directory to start searching
     directory: String,
     #[clap(short, long)]
+    /// Skip confirmation
+    skip_confirmation: bool,
+    #[clap(short, long)]
     /// Verbose mode
     verbose: bool,
-    #[clap(short, long)]
-    /// Ask for confirmation
-    skip_confirmation: bool,
 }
 
 fn main() {

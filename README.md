@@ -36,8 +36,8 @@ Arguments:
   <DIRECTORY>  Directory to start searching
 
 Options:
+  -s, --skip-confirmation  Skip confirmation
   -v, --verbose            Verbose mode
-  -s, --skip-confirmation  Ask for confirmation
   -h, --help               Print help
   -V, --version            Print version
 ```
