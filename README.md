@@ -8,9 +8,9 @@ Pycruft provides a simple, fast and efficient way to remove unnecessary Python b
 
 ## Features
 
-- Recursively scans directories `__pycache__` directories.
-- Verbose mode (`-v`, `--verbose`), display detailed information about the cleaning process.
-- Confirmation mode (`-c`, `--confirm`), show directories to be deleted and ask for confirmation.
+- Recursively scans for `__pycache__` directories.
+- Skip confirmation flag (`-s`, `--skip-confirmation`), remove directories without confirmation.
+- Verbose flag (`-v`, `--verbose`), display detailed information about the cleaning process.
 - Cross-platform support for Windows, macOS, and Linux.
 
 ## Getting Started
@@ -29,7 +29,20 @@ cargo install --path .
 
 ## Usage
 
-Run `pycruft .` inside the directory you want to clean or provide a path to this directory like this: `pycruft my/path`.
+```
+Usage: pycruft [OPTIONS] <DIRECTORY>
+
+Arguments:
+  <DIRECTORY>  Directory to start searching
+
+Options:
+  -v, --verbose            Verbose mode
+  -s, --skip-confirmation  Ask for confirmation
+  -h, --help               Print help
+  -V, --version            Print version
+```
+
+Run `pycruft .` to clean the current directory. To clean another directory provide a path like this: `pycruft my/path`.
 
 For more options, run `pycruft --help`.
 
