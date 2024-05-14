@@ -17,12 +17,12 @@ struct Args {
     verbose: bool,
     #[clap(short, long)]
     /// Ask for confirmation
-    confirm: bool,
+    skip_confirmation: bool,
 }
 
 fn main() {
     let args = Args::parse();
     let dir = Path::new(&args.directory);
 
-    start(dir, Some(args.confirm), Some(args.verbose));
+    start(dir, Some(args.skip_confirmation), Some(args.verbose));
 }

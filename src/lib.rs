@@ -43,8 +43,8 @@ fn remove_bytecode_dirs(results: &Vec<PathBuf>, verbose: bool) -> Result<u32, st
     Ok(dirs_removed)
 }
 
-pub fn start(dir: &Path, confirm: Option<bool>, verbose: Option<bool>) {
-    let confirm = confirm.unwrap_or(false);
+pub fn start(dir: &Path, skip_confirmation: Option<bool>, verbose: Option<bool>) {
+    let skip_confirmation = skip_confirmation.unwrap_or(false);
     let verbose = verbose.unwrap_or(false);
 
     let results = match find_bytecode_dirs(dir) {
@@ -60,7 +60,7 @@ pub fn start(dir: &Path, confirm: Option<bool>, verbose: Option<bool>) {
         process::exit(0);
     }
 
-    if !confirm {
+    if skip_confirmation {
         match remove_bytecode_dirs(&results, verbose) {
             Ok(dirs_removed) => {
                 println!("Removed {} directories", dirs_removed);
@@ -73,10 +73,18 @@ pub fn start(dir: &Path, confirm: Option<bool>, verbose: Option<bool>) {
         }
     }
 
-    for path in &results {
-        println!("{}", path.to_string_lossy());
+    if verbose {
+        for path in &results {
+            println!("{}", path.to_string_lossy());
+        }
     }
-    println!("\nDo you want to remove the listed directories? (yes/no)");
+
+    println!(
+        "\nAre you sure you want to remove {} '{}' directories at '{}'?\n(yes/no)",
+        results.len(),
+        BYTECODE_DIR,
+        dir.to_string_lossy()
+    );
 
     let mut input = String::new();
 

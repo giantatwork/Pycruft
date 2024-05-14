@@ -37,7 +37,7 @@ mod tests {
 
         let test_cases = setup_test_cases(&temp_dir);
 
-        start(dir_path, Some(false), Some(false));
+        start(dir_path, Some(true), Some(false));
 
         for (path_str, exists) in &test_cases {
             let path = dir_path.join(path_str);
